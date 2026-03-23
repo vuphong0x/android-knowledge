@@ -2,20 +2,21 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'Android Knowledge Hub',
-  description: 'Tổng hợp kiến thức Android có cấu trúc, dễ tra cứu và cập nhật',
+  description: 'Tổng hợp kiến thức Android',
   base: '/android-knowledge/',
   themeConfig: {
     nav: [
-      { text: 'Trang chủ', link: '/' },
+      { text: 'Home', link: '/' },
       { text: 'Roadmap', link: '/roadmap' }
     ],
     sidebar: [
       {
-        text: 'Nền tảng',
+        text: 'Foundation',
         items: [
           { text: 'Kotlin', link: '/foundation/kotlin' },
           { text: 'OOP', link: '/foundation/oop' },
-          { text: 'Coroutines', link: '/foundation/coroutines' }
+          { text: 'Coroutines', link: '/foundation/coroutines' },
+          { text: 'Flows', link: '/foundation/flows' }
         ]
       },
       {
