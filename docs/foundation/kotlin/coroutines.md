@@ -72,7 +72,6 @@ Coroutine là một concurrency design pattern để đơn giản hóa code xử
             }
             return null
         }
-    ```
 
 ## 2. Quản lý Context & Threading
 
@@ -107,3 +106,6 @@ Cả hai đều được dùng để quản lý hệ thống phân cấp corouti
 * **Try-catch:** Dùng trực tiếp bên trong coroutine body hoặc quanh một suspending function để bắt các exception cụ thể (ví dụ: `IOException` khi gọi mạng).
 * **CoroutineExceptionHandler:** Bắt các "uncaught exceptions" ở cấp root của hệ thống phân cấp coroutine. Dùng như một phương án dự phòng cuối cùng để tránh app crash, thường được truyền vào `CoroutineContext`.
 * **Lưu ý:** `CancellationException` là một ngoại lệ đặc biệt. Khi bị ném ra, nó báo hiệu coroutine đã bị hủy và bị lờ đi bởi `CoroutineExceptionHandler`. Không nên "nuốt" (swallow) `CancellationException` trong khối `catch (e: Exception)` chung chung.
+
+## Các kịch bản call API
+<iframe src="https://pl.kotl.in/2vAEIJfuG"></iframe>

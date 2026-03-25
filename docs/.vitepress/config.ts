@@ -4,19 +4,26 @@ export default defineConfig({
   title: 'Android Knowledge Hub',
   description: 'Tổng hợp kiến thức Android',
   base: '/android-knowledge/',
+  lastUpdated: true,
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Roadmap', link: '/roadmap' }
+      { text: 'Roadmap', link: '/roadmap' },
+      { text: 'About', link: '/about' }
     ],
     sidebar: [
       {
         text: 'Foundation',
         items: [
-          { text: 'Kotlin', link: '/foundation/kotlin' },
+          { text: 'Kotlin',
+            collapsed: true,
+            items: [
+              { text: 'Basics', link: '/foundation/kotlin/basics' },
+              { text: 'Coroutines', link: '/foundation/kotlin/coroutines' },
+              { text: 'Flows', link: '/foundation/kotlin/flows' }
+            ]
+          },
           { text: 'OOP', link: '/foundation/oop' },
-          { text: 'Coroutines', link: '/foundation/coroutines' },
-          { text: 'Flows', link: '/foundation/flows' }
         ]
       },
       {
