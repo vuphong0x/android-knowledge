@@ -6,6 +6,9 @@ export default defineConfig({
   base: '/android-knowledge/',
   lastUpdated: true,
   themeConfig: {
+    search: {
+      provider: 'local'
+    },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Roadmap', link: '/roadmap' },
@@ -74,6 +77,14 @@ export default defineConfig({
           { text: 'JUnit', link: '/testing/junit' },
           { text: 'UI Testing', link: '/testing/ui-testing' },
           { text: 'MockK', link: '/testing/mockk' }
+        ]
+      },
+      {
+        text: 'Real World',
+        items: [
+          { text: 'CI/CD Pipelines', link: '/real-world/ci-cd' },
+          { text: 'Analytics & Crashlytics', link: '/real-world/analytics' },
+          { text: 'Legacy Code Refactoring', link: '/real-world/legacy-code' }
         ]
       },
       {

@@ -1,51 +1,67 @@
-# OOP
+# Object-Oriented Programming (OOP) in Kotlin
 
----
+Kotlin embraces OOP while also introducing functional programming features. It fixes many of Java’s design issues, providing a safer and more robust object model.
 
-## 1. OOP là gì?
-OOP (Object-Oriented Programming) là một phương pháp lập trình dựa trên khái niệm "đối tượng" (Object), bao gồm dữ liệu (thuộc tính) và phương thức (hành động). 
+## Key OOP Concepts in Kotlin
 
----
-
-## 2. Các thành phần cốt lõi của OOP
-- **Lớp (Class) và Đối tượng (Object)**: Lớp là khuôn mẫu (ví dụ: lớp "Xe máy"), đối tượng là thực thể cụ thể dựa trên khuôn mẫu đó (ví dụ: chiếc xe máy Honda của bạn).
-- **4 Tính chất cơ bản**:
-    1. **Tính đóng gói (Encapsulation)**: Che giấu dữ liệu bên trong lớp và chỉ cho phép truy cập qua các phương thức công khai, giúp bảo mật dữ liệu.
-    2. **Tính kế thừa (Inheritance)**: Cho phép lớp con sử dụng lại các thuộc tính và phương thức của lớp cha, giúp tiết kiệm mã nguồn.
-    3. **Tính đa hình (Polymorphism)**: Một phương thức có thể được thực hiện bằng nhiều cách khác nhau ở các đối tượng khác nhau.
-    4. **Tính trừu tượng (Abstraction)**: Chỉ tập trung vào các đặc điểm chính của đối tượng mà bỏ qua các chi tiết phức tạp không cần thiết. 
-
-### 2.1 Vấn đề nếu không dùng OOP
-- Code procedural dễ bị:
-  - trùng lặp logic
-  - khó maintain
-  - khó scale
-
-### 2.2 OOP giải quyết gì?
-- Gom logic + data lại thành object
-- Giảm coupling
-- Tăng reusability
-- Dễ test hơn
-
----
-
-## 3. 4 nguyên lý cốt lõi
-
----
-
-### 3.1 Encapsulation (Đóng gói)
-
-#### 3.1.1 Bản chất
-Ẩn implementation, chỉ expose API cần thiết.
-
-#### 3.1.2 Ví dụ
+### 1. Classes and Inheritance
+By default, all classes in Kotlin are `final` (cannot be inherited). To allow inheritance, a class must be explicitly marked with the `open` keyword.
 
 ```kotlin
-class BankAccount(private var balance: Double) {
-
-    fun deposit(amount: Double) {
-        if (amount > 0) balance += amount
+open class Animal(val name: String) {
+    open fun makeSound() {
+        println("Animal sound")
     }
-
-    fun getBalance(): Double = balance
 }
+
+class Dog(name: String) : Animal(name) {
+    override fun makeSound() {
+        println("Bark")
+    }
+}
+```
+
+### 2. Interfaces
+Interfaces in Kotlin can contain abstract default method implementations, making them more powerful than traditional Java interfaces (prior to Java 8).
+- A class can implement multiple interfaces.
+- If multiple interfaces provide default implementations for the same method name, the implementing class *must* override that method and resolve the conflict.
+
+### 3. Abstract Classes
+Used to define a blueprint representing a concept. An abstract class cannot be instantiated directly.
+- Unlike interfaces, abstract classes can hold state (properties).
+
+### 4. Visibility Modifiers
+- `public`: (Default) Visible everywhere.
+- `private`: Visible only inside the file or class containing the declaration.
+- `protected`: Visible inside the class and its subclasses (unlike Java, which allows package-level access).
+- `internal`: Visible anywhere within the same module (useful for multi-module architectures).
+
+### 5. Companion Objects
+Kotlin does not have the `static` keyword. Instead, it uses `companion object` to define instances tied to a class rather than instances of the class.
+
+```kotlin
+class User private constructor(val name: String) {
+    companion object {
+        fun createGuest(): User = User("Guest")
+    }
+}
+```
+
+### 6. Sealed Classes and Interfaces
+Provides restricted class hierarchies where a value can have one of the types from a limited set. Excellent for representing UI states (Loading, Success, Error).
+
+```kotlin
+sealed class UiState {
+    object Loading : UiState()
+    data class Success(val data: List<Item>) : UiState()
+    data class Error(val exception: Exception) : UiState()
+}
+```
+
+## Interview Questions
+
+**Q: What is the main usage of `sealed class`?**
+*Answer:* `sealed class` is used to represent constrained hierarchies (enum on steroids). It restricts inheritance to classes defined within the same file. It ensures exhaustive `when` statements at compile-time when checking all possible subtypes, making it the perfect pattern for MVI/MVVM UI states.
+
+**Q: How does `internal` differ from Java's package-private visibility?**
+*Answer:* Java's package-private allows access to any class inside the same package. Kotlin's `internal` allows access to any class compiled together in the same *module* (e.g., a specific Gradle module), regardless of package.

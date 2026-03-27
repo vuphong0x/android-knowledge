@@ -1,6 +1,6 @@
 # Android Knowledge Hub
 
-Tài liệu tổng hợp kiến thức Android + các câu hỏi phỏng vấn.
+Tài liệu tổng hợp kiến thức Android + interview questions.
 
 ## Nội dung chính
 
@@ -11,4 +11,5 @@ Tài liệu tổng hợp kiến thức Android + các câu hỏi phỏng vấn.
 - Data layer
 - Performance
 - Testing
+- Real-world Experience
 - Interview notes

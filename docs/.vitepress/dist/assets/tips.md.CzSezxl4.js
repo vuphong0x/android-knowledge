@@ -1,0 +1,1 @@
+import{_ as t,o as e,c as a}from"./chunks/framework.BKDXG6j6.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"tips.md","filePath":"tips.md","lastUpdated":1774283189000}'),s={name:"tips.md"};function r(o,p,c,n,i,d){return e(),a("div")}const f=t(s,[["render",r]]);export{m as __pageData,f as default};
