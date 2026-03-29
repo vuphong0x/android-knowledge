@@ -30,7 +30,8 @@ public final class ExtensionKt {
 A: Kotlin luôn ưu tiên Member function. Extension function sẽ bị bỏ qua.
 
 ## Q: Tính chất Static Dispatch.
-
+- Quyết định hàm nào được gọi dựa trên kiểu biến, không dựa trên kiểu object thực tế.
+- Ví dụ:
 ```
 open class Shape
 class Rectangle: Shape()
@@ -45,4 +46,3 @@ fun printClassName(s: Shape) {
 printClassName(Rectangle())
 // Output: Rectangle
 ```
-- Quyết định hàm nào được gọi dựa trên kiểu biến, không dựa trên kiểu object thực tế

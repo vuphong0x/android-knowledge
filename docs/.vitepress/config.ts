@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Android Knowledge Hub',
   description: 'Tổng hợp kiến thức Android',
-  base: '/android-knowledge/',
+  base: '/',
   lastUpdated: true,
   themeConfig: {
     search: {
@@ -96,7 +96,7 @@ export default defineConfig({
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuphong0x/android-knowledge' }
+      { icon: 'github', link: 'https://github.com/vuphong0x/' }
     ]
   }
 })

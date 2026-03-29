@@ -1,9 +1,7 @@
 # Kotlin Coroutines
 Coroutine là một concurrency design pattern để đơn giản hóa code xử lý bất đồng bộ (asynchronous).
 
-## Mức độ Nền tảng (Foundation)
-
-### 1. Bản chất của "Lightweight Thread" và suspend function.
+## 1. Bản chất của "Lightweight Thread" và suspend function.
 **a. Lightweight Thread:**
 - `Thread`: 
     - Khi tạo một Thread mới, OS cần cấp phát một vùng nhớ stack riêng (thường khoảng 1MB) và việc chuyển ngữ cảnh (Context Switching) giữa các Thread sẽ rất tốn tài nguyên
@@ -73,7 +71,81 @@ Coroutine là một concurrency design pattern để đơn giản hóa code xử
             return null
         }
 
-## 2. Quản lý Context & Threading
+## 2. launch vaf async
+### Q: Khi gọi launch hoặc async thì logic bên trong có được thực thi ngay lập tức không?
+Khi gọi `launch` hoặc `async` theo mặc định thì logic bên trong sẽ **KHÔNG** được thực thi ngay lập tức, mà sẽ được lập lịch (scheduled) để thực hiện.
+
+Nguyên nhân là do cơ chế của `CoroutineStart` và cách `Dispatcher` hoạt động.
+
+`CoroutineStart.DEFAULT` (Mặc định)
+
+**Cơ chế**: Coroutine được gửi đến `Dispatcher` chỉ định. Dispatcher sẽ đưa nó vào queue (hàng đợi) và thực thi khi có tài nguyên (thread trống) và đến lượt nó.
+
+**Khả năng hủy:** Nếu gọi `job.cancel()` ngay sau khi gọi `launch`, Coroutine có thể bị hủy **trước khi nó kịp bắt đầu** chạy dòng code đầu tiên.
+
+**Ví dụ**:
+```kotlin
+fun main() = runBlocking {
+    println("A")
+    launch {
+        println("B") // Chạy sau khi main giải phóng hoặc gặp điểm suspend
+    }
+    println("C")
+}
+// Kết quả: A -> C -> B (B không chạy ngay sau A)
+```
+
+`CoroutineStart.LAZY` (Chỉ chạy khi cần)
+
+**Cơ chế**: Nó sẽ chỉ tạo coroutine chứ không lên lịch thực thi coroutine. Chỉ chạy khi gọi `start()`, `join()` hoặc `await()`
+
+**Lưu ý**: Nếu tạo một coroutine với LAZY mà không có cơ chế start hoặc cancell thì nó sẽ không bao giờ hoàn thành, dẫn đến việc code có thể bị "tắc" hoặc rò rỉ tài nguyên.
+
+**Ví dụ**:
+```kotlin
+fun main() = runBlocking {
+    println("A")
+    val lazyJob = launch(start = CoroutineStart.LAZY) {
+        println("B")
+    }
+    // Nếu không có trigger nào đến lazyJob thì cả chương trình này sẽ bị block
+    lazyJob.start() // Hoặc lazyJob.join()
+    println("C")
+}
+```
+
+`CoroutineStart.ATOMIC` (Đảm bảo khởi chạy)
+**Cơ chế**: Tương tự như DEFAULT (được lập lịch thông qua Dispatcher), nhưng không thể bị huy trước khi nó bắt đầu chạy. Nếu gọi `job.cancel()` ngay sau `lanch(start = ATOMIC)`, Coroutine vẫn chạy cho đến khi gặp suspension point đầu tiên rồi mới dừng lại.
+
+`CoroutineStart.UNDISPATCHED` (Chạy ngay lập tức)
+Chạy **ngay lập tức** trên **thread hiện tại** cho đến khi gặp điểm treo (`suspension point`) đầu tiên. Sau khi resume, nó sẽ tiếp tục chạy trên Dispatcher được đính nghĩa trong Context (có thể khác luồng ban đầu)
+
+**Cơ chế**: Coroutine được gửi đến `Dispatcher` để xếp hàng. Ngay sau khi gọi `launch`, luồng code hiện tại (bên ngoài khối `launch`) sẽ **tiếp tục chạy ngay lập tức** mà không đợi khối logic bên trong.
+
+**Thứ tự thực thi**: Khối logic bên trong sẽ chạy ngay khi `Dispatcher` có tài nguyên (thread trống) và đến lượt nó.
+
+**Ví dụ**:
+```kotlin
+fun main() = runBlocking {
+    println("Code dang chạy trên: ${Thread.currentThread().name}")
+
+    launch(Dispatchers.Default, start = CoroutineStart.UNDISPATCHED) {
+        println("Trước Suspend: ${Thread.currentThread().name}")
+        delay(100) // Điểm treo (Suspension point)
+        println("Sau Suspend: ${Thread.currentThread().name}")
+    }
+    println("Lệnh launch đã xong: ${Thread.currentThread().name}")
+}
+/*
+Kết quả:
+ Code dang chạy trên: main @coroutine#1
+Trước Suspend: main @coroutine#2
+Lệnh launch đã xong: main @coroutine#1
+Sau Suspend: DefaultDispatcher-worker-1 @coroutine#2
+*/
+```
+
+## 3. Quản lý Context & Threading
 
 ### Q: Phân biệt các loại Dispatchers (`Main`, `IO`, `Default`, `Unconfined`) trong Android?
 * `Dispatchers.Main`: Chạy trên Main UI Thread của Android. Dùng để tương tác với UI và thực hiện các công việc nhẹ (ví dụ: update View, call UI functions).
@@ -107,5 +179,70 @@ Cả hai đều được dùng để quản lý hệ thống phân cấp corouti
 * **CoroutineExceptionHandler:** Bắt các "uncaught exceptions" ở cấp root của hệ thống phân cấp coroutine. Dùng như một phương án dự phòng cuối cùng để tránh app crash, thường được truyền vào `CoroutineContext`.
 * **Lưu ý:** `CancellationException` là một ngoại lệ đặc biệt. Khi bị ném ra, nó báo hiệu coroutine đã bị hủy và bị lờ đi bởi `CoroutineExceptionHandler`. Không nên "nuốt" (swallow) `CancellationException` trong khối `catch (e: Exception)` chung chung.
 
-## Các kịch bản call API
-<iframe src="https://pl.kotl.in/2vAEIJfuG"></iframe>
+## 4. Các kịch bản call API
+### 1. Call 2 API song song
+```kotlin
+suspend function loadData(): Pair<String, String> = coroutineScope {
+    val user = async { getUser() }
+    val settings = async { getSettings() }
+    return@coroutineScope Pair(user.await(), settings.await())
+}
+```
+### 2. Nếu đang call API mà người dùng nhấn Back, làm sao để không bị leak memory hoặc tốn băng thông?
+- Sử dụng **viewModelScope**. Khi người dùng nhấn Back, Activity/Fragment bị hủy -> ViewModel bị clear -> Coroutine bị Cancel. Khi Coroutine bị cancel, nó throw ra `CancellationException`. Các thư viện như **Retrofit** sẽ bắt Exception này và gọi lệnh `call.cancel` xuống **OkHttp** để hủy request.
+
+### 3. Làm sao để tránh gọi API trùng lặp khi user spam "Refresh" liên tục
+Có nhiều cách để xử lý vấn đề này, có thể xử lý ở phía App hoặc phía Web. Sau đây là 3 trong số chúng ở phía App:</br>
+1. Kiểm tra trạng thái hiện tại của UI. 
+- **Logic:** Nếu state đang là `Loading` thì bỏ qua yêu cầu click mới
+```kotlin
+fun refreshData() {
+    if (_uiState.value is UiState.Loading) return
+
+    viewModelScope.launch {
+        _uiState.value = UiState.Loading
+        val result = repository.getData()
+        _uiState.value = UiState.Success(result)
+    }
+}
+```
+2. Hủy Job cũ (Job Cancellation)
+Cách này thường dùng khi chúng ta muốn user luôn nhận được kết quả của lần bấm cuối cùng (thường dùng cho Search Bar)
+- **Logic:** Lưu lại tham chiếu của `Job`. Khi có lệnh call mới, gọi `cancel()` Job cũ trước khi khởi chạy Job mới.
+```kotlin
+private var refreshJob: Job? = null
+
+fun refreshData() {
+    refreshJob?.cancel()
+    refreshJob = viewModelScope.launch {
+        val result = repository.getData()
+        _uiState.value = UiState.Success(result)
+    }
+}
+```
+3. Reactive Throttling (Flow)
+- **Logic:** Chúng ta có thể tự định nghĩa một toán tử `throttleFirst` để chỉ lấy click đầu tiên trong khoảng thời gian nhất định.
+- **Ưu điểm**: Tách biệt logic xử lý UI và logic call API.
+```kotlin
+fun <T> Flow<T>.throttleFirst(windowDuration: Long): Flow<T> = flow {
+    var lastEmissionTime = 0L
+    collect { value -> 
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastEmissionTime > windowDuration) {
+            lastEmissionTime = currentTime
+            emit(value)
+        }
+}
+
+// Cách dùng trong ViewModel
+val clickFlow = MutableSharedFlow<Unit>()
+
+init {
+    clickFlow
+        .throttleFirst(500L) // Trong 0.5s chỉ chấp nhận 1 click
+        .onEach { 
+            performRefresh() 
+        }
+        .launchIn(viewModelScope)
+}
+```

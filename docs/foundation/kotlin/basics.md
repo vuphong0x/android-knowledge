@@ -16,3 +16,7 @@ Execute a block of code within the context of an object.
 
 **Q: Explain the difference between `let` and `apply`.**
 *Answer:* `let` takes the object as `it` and returns the result of the lambda. `apply` takes the object as `this` and returns the object itself. `apply` is for configuration, `let` is for transformation or null checks.
+
+Q: object và data object khác gì nhau?
+
+Q: Scaffold and Surface
